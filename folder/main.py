@@ -5,16 +5,29 @@ from dotenv import load_dotenv
 from aiogram import Bot, Dispatcher
 from aiogram.types import Message
 
+from google import genai
+
 load_dotenv()
 
 dp = Dispatcher()                        # [2]
-
+client = genai.Client()                   
 
 @dp.message()                            # [3]
 async def any_message(                   # [4]
         message: Message,                # [5]
 ):
-    await message.answer("Hello world!") # [6]
+    try:
+        await message.answer("Hello world!") # [6]
+        response = client.models.generate_content(          
+            model="gemini-3.5-flash",                      
+            contents=message.text,   
+        )
+    except Exception as e:
+        print(f"{TypeError(e)}: Error: {e}")
+        await message.answer("Something went wrong!")
+        return
+    else:
+        await message.answer(response.text)
 
 
 async def main():
