@@ -52,6 +52,18 @@ async def any_message(                   # [4]
             response = client.models.generate_content(
                 model="gemini-3.5-flash",
                 contents=message.text,
+                config={
+                        "system_instruction": """
+                Ты отвечаешь пользователю в Telegram.
+
+                Правила:
+                - Не используй Markdown.
+                - Отвечай кратко и по существу.
+                - Если можно ответить в 1-3 предложениях, отвечай в 1-3 предложениях.
+                - Не используй заголовки, таблицы и длинные списки.
+                - Пиши на том языке, на котором написал пользователь.
+                """
+    }
             )
         except Exception as err:
             print(f"{type(err)}: {err}")
