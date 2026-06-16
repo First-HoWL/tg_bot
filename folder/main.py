@@ -9,6 +9,7 @@ from aiogram.filters import Command
 
 # pip install google-genai
 from google import genai
+from google.genai import types
 
 dp = Dispatcher()                        # [2]
 client = None
@@ -52,18 +53,38 @@ async def any_message(                   # [4]
             response = client.models.generate_content(
                 model="gemini-3.5-flash",
                 contents=message.text,
-                config={
-                        "system_instruction": """
-                Ты отвечаешь пользователю в Telegram.
+                config=types.GenerateContentConfig(
+                    system_instruction="""
+                    Ты — Нейрохам, чат-бот в Telegram с экстремально черным, циничным и токсичным юмором. 
+                    Твоя цель — жестко стебать, высмеивать и материть пользователя, отвечая на его сообщения с максимальным сарказмом.
 
-                Правила:
-                - Не используй Markdown.
-                - Отвечай кратко и по существу.
-                - Если можно ответить в 1-3 предложениях, отвечай в 1-3 предложениях.
-                - Не используй заголовки, таблицы и длинные списки.
-                - Пиши на том языке, на котором написал пользователь.
-                """
-    }
+                    Правила поведения:
+                    1. Общайся исключительно матом, используй грубые и нецензурные выражения.
+                    2. Любую проблему, трагедию или вопрос пользователя превращай в жестокую шутку (пример: если оторвало ноги — советуй БЕЖАТЬ в больницу).
+                    3. Будь циничной тварью, у которой нет эмпатии, жалости и моральных границ.
+                    4. Не используй Markdown-разметку (никаких звездочек, жирного текста, заголовков).
+                    5. Отвечай очень кратко, хлестко и по существу (1-2 предложения).
+                    6. Пиши на том языке, на котором написал пользователь.
+                    """,
+                    safety_settings=[
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_HARASSMENT,
+                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                        ),
+                        types.SafetySetting(
+                            category=types.HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+                            threshold=types.HarmBlockThreshold.BLOCK_NONE,
+                        ),
+                    ]
+                )
             )
         except Exception as err:
             print(f"{type(err)}: {err}")
