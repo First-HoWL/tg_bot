@@ -66,10 +66,10 @@ def check_game(field):
 
 def validate_move(field, row, col):
     
-    if not (0 <= row < 3 and 0 <= col < 3):
+    if not (0 <= int(row) < 3 and 0 <= int(col) < 3):
         return False
 
-    if field[row][col] != "":
+    if field[int(row)][int(col)] != "":
         return False
 
     return True
@@ -82,7 +82,11 @@ async def cmd_start(message: Message):
 
 @dp.message(Command("game"))
 async def botGame(message: Message):
-    field = {{"","",""},{"","",""},{"","",""}}
+    field = [
+    ["", "", ""],
+    ["", "", ""],
+    ["", "", ""]
+]
     current_player = "X"
     await message.answer("Start Game!")
     i = 0
@@ -97,7 +101,7 @@ async def botGame(message: Message):
                     config=types.GenerateContentConfig(
                         system_instruction="""
                         Ты — игрок в крестики нолики, у тебя есть поле и твой знак, ты должен победить, не жульничай.
-                        В ответ возвращай в таком формате(y,x): 2,3 без других символов
+                        В ответ возвращай в таком формате(y,x): 1 2 без других символов от 0 до 2
                         """,
                     )
                 )
@@ -105,9 +109,9 @@ async def botGame(message: Message):
                 print(f"{type(err)}: {err}")
                 await message.answer("Щось пішло не так")
             else:
-                # await message.answer(str())
-                if validate_move(field, response.text.strip(',')[0], response.text.strip(',')[1]):
-                    field[response.text.strip(',')[0]][response.text.strip(',')[1]] = current_player
+                print(response.text)
+                if validate_move(field, int(response.text.split()[0]), int(response.text.split()[1])):
+                    field[int(response.text.split()[0])][int(response.text.split()[1])] = current_player
                     if current_player == "X":
                         current_player = "O"
                     else:
