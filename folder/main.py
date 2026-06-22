@@ -104,6 +104,10 @@ async def botGame(message: Message):
                 # await message.answer(str())
                 if validate_move(field, response.text.strip(',')[0], response.text.strip(',')[1]):
                     field[response.text.strip(',')[0]][response.text.strip(',')[1]] = current_player
+                    if current_player == "X":
+                        current_player = "O"
+                    else:
+                        current_player = "X"
                     await message.answer(
                         f"-------------\n" \
                         f"| {field[0][0]} | {field[0][1]} | {field[0][2]} |\n" \
