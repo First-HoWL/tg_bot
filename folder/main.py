@@ -35,10 +35,92 @@ def auth_gemini_api():
         print("Can`t connect to Gemini API. Running without one.")
     return None
 
+def check_game(field):
+    """
+    'X'  - победил X
+    'O'  - победил O
+    'draw' - ничья
+    None - игра продолжается
+    """
+
+    lines = []
+
+    lines.extend(field)
+
+    for col in range(3):
+        lines.append([field[row][col] for row in range(3)])
+
+    lines.append([field[i][i] for i in range(3)])
+    lines.append([field[i][2 - i] for i in range(3)])
+
+    for line in lines:
+        if line == ["X", "X", "X"]:
+            return "X"
+        if line == ["O", "O", "O"]:
+            return "O"
+
+    if all(cell != "" for row in field for cell in row):
+        return "draw"
+
+    return None
+
+def validate_move(field, row, col):
+    
+    if not (0 <= row < 3 and 0 <= col < 3):
+        return False
+
+    if field[row][col] != "":
+        return False
+
+    return True
+
+
 # Обробник команди /start
 @dp.message(Command("start"))
 async def cmd_start(message: Message):
     await message.answer("Let`s talk!")
+
+@dp.message(Command("startBotGame"))
+async def botGame(message: Message):
+    field = {{"","",""},{"","",""},{"","",""}}
+    current_player = "X"
+    while True:
+        if check_game(field) is None:
+            try:
+                response = client.models.generate_content(
+                    model="gemini-3.5-flash",
+                    contents=str(field) + f"ты играешь за {current_player}",
+                    config=types.GenerateContentConfig(
+                        system_instruction="""
+                        Ты — игрок в крестики нолики, у тебя есть поле и твой знак, ты должен победить, не жульничай.
+                        В ответ возвращай в таком формате(y,x): 2,3 без других символов
+                        """,
+                    )
+                )
+            except Exception as err:
+                print(f"{type(err)}: {err}")
+                await message.answer("Щось пішло не так")
+            else:
+                # await message.answer(str())
+                if validate_move(field, response.text.strip(',')[0], response.text.strip(',')[1]):
+                    field[response.text.strip(',')[0]][response.text.strip(',')[1]] = current_player
+                    await message.answer(
+                        f"-------------\n" \
+                        f"| {field[0][0]} | {field[0][1]} | {field[0][2]} |\n" \
+                        f"-------------\n" \
+                        f"| {field[1][0]} | {field[1][1]} | {field[1][2]} |\n" \
+                        f"-------------\n" \
+                        f"| {field[2][0]} | {field[2][1]} | {field[2][2]} |\n" \
+                        f"-------------")
+        else:
+            win = check_game(field)
+            if win == "X":
+                await message.answer("X win!")
+            elif win == "O":
+                await message.answer("O win!")
+            elif win == "draw":
+                await message.answer("Draw!")
+            break
 
 # Обробних всіх інших повідомлень
 @dp.message()                            # [3]
