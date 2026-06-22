@@ -80,7 +80,7 @@ def validate_move(field, row, col):
 async def cmd_start(message: Message):
     await message.answer("Let`s talk!")
 
-@dp.message(Command("startBotGame"))
+@dp.message(Command("game"))
 async def botGame(message: Message):
     field = {{"","",""},{"","",""},{"","",""}}
     current_player = "X"
