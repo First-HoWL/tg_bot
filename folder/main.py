@@ -84,7 +84,11 @@ async def cmd_start(message: Message):
 async def botGame(message: Message):
     field = {{"","",""},{"","",""},{"","",""}}
     current_player = "X"
+    await message.answer("Start Game!")
+    i = 0
     while True:
+        await message.answer(f"{i} round!")
+        i+= 1
         if check_game(field) is None:
             try:
                 response = client.models.generate_content(
