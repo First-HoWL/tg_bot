@@ -12,6 +12,7 @@ from google import genai
 from google.genai import types
 from db import DataBase
 
+import json
 
 dp = Dispatcher()                        # [2]
 client = None
