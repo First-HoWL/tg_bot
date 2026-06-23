@@ -10,10 +10,41 @@ from aiogram.filters import Command
 # pip install google-genai
 from google import genai
 from google.genai import types
+from db import DataBase
+
 
 dp = Dispatcher()                        # [2]
 client = None
 bot = None
+
+
+test_db = None
+
+
+def auth_db():
+    try:
+        return DataBase(
+            table_name="TestTable",
+            region="us-east-1"
+        )
+    except Exception as err:
+        print(f"{type(err)}: {err}")
+
+@dp.message(Command("db"))
+async def cmd_db(message: Message):
+    try:
+        await message.answer(str(test_db))
+    except Exception as err:
+        await message.answer(f"{type(err)}: {err}")
+
+@dp.message(Command("db_add"))
+async def cmd_db_add(message: Message):
+    arg = message.text.removeprefix("/db_add ")
+    try:
+        test_db.put_item(json.loads(arg))
+        await message.answer(str(test_db))
+    except Exception as err:
+        await message.answer(f"{type(err)}: {err}")
 
 # Підключення до telegram-бота
 def auth_telegram():
@@ -188,11 +219,12 @@ async def any_message(                   # [4]
 
 
 async def main():
-    global bot, client
-
+    global bot, client, test_db
+    
     load_dotenv()
     bot = auth_telegram()
     client = auth_gemini_api()
+    test_db = auth_db()
 
     print("Starting bot...")
     try:
